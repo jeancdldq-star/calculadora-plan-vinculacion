@@ -6,6 +6,11 @@
     <title>Calculadora de Vinculación</title>
     <!-- Cargamos Tailwind CSS para el diseño rápido y moderno -->
     <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            darkMode: 'class', // Habilitamos el modo oscuro por clases
+        }
+    </script>
     <style>
         /* Pequeña animación para la aparición del resultado */
         .fade-in {
@@ -17,59 +22,72 @@
         }
     </style>
 </head>
-<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
+<body class="bg-slate-50 dark:bg-slate-900 min-h-screen flex flex-col items-center justify-center p-4 font-sans text-slate-800 dark:text-slate-200 transition-colors duration-300">
 
     <!-- Notificación tipo Toast (Oculta por defecto) -->
-    <div id="toastNotificacion" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 flex items-center w-full max-w-sm p-4 space-x-3 text-amber-800 bg-amber-100 border border-amber-300 rounded-lg shadow-lg transition-all duration-500 opacity-0 -translate-y-10 pointer-events-none">
-        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 shrink-0 text-amber-600">
+    <div id="toastNotificacion" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 flex items-center w-full max-w-sm p-4 space-x-3 text-amber-800 bg-amber-100 border border-amber-300 dark:bg-amber-900/50 dark:border-amber-700 dark:text-amber-300 rounded-lg shadow-lg transition-all duration-500 opacity-0 -translate-y-10 pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 shrink-0 text-amber-600 dark:text-amber-400">
             <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
         </svg>
         <div class="font-medium text-sm">Nota: Este cálculo es un resultado puramente teórico y orientativo.</div>
     </div>
 
-    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-100">
+    <!-- Contenedor Principal de la Calculadora -->
+    <div class="bg-white dark:bg-slate-800 rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-100 dark:border-slate-700 transition-colors duration-300">
         
         <!-- Cabecera -->
-        <div class="bg-blue-600 p-6 text-center">
+        <div class="bg-blue-600 dark:bg-blue-900 p-6 text-center relative transition-colors duration-300">
             <h1 class="text-2xl font-bold text-white">Calculadora de Vinculación</h1>
-            <p class="text-blue-100 text-sm mt-1">Calcula tu importe a percibir</p>
+            <p class="text-blue-100 dark:text-blue-200 text-sm mt-1">Calcula tu importe a percibir</p>
+            
+            <!-- Botón Modo Oscuro/Claro -->
+            <button onclick="toggleTema()" class="absolute top-4 right-4 p-2 text-blue-100 hover:text-white hover:bg-blue-500 dark:hover:bg-blue-800 rounded-full transition-all" title="Alternar Modo Oscuro">
+                <!-- Icono Sol (se muestra en modo oscuro) -->
+                <svg id="iconoSolo" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5 hidden">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M12 3v2.25m6.364.386l-1.591 1.591M21 12h-2.25m-.386 6.364l-1.591-1.591M12 18.75V21m-4.773-4.227l-1.591 1.591M5.25 12H3m4.227-4.773L5.636 5.636M15.75 12a3.75 3.75 0 11-7.5 0 3.75 3.75 0 017.5 0z" />
+                </svg>
+                <!-- Icono Luna (se muestra en modo claro) -->
+                <svg id="iconoLuna" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24" stroke-width="1.5" stroke="currentColor" class="w-5 h-5">
+                  <path stroke-linecap="round" stroke-linejoin="round" d="M21.752 15.002A9.718 9.718 0 0118 15.75c-5.385 0-9.75-4.365-9.75-9.75 0-1.33.266-2.597.748-3.752A9.753 9.753 0 003 11.25C3 16.635 7.365 21 12.75 21a9.753 9.753 0 009.002-5.998z" />
+                </svg>
+            </button>
         </div>
 
         <!-- Formulario -->
         <div class="p-6 space-y-5">
             
             <!-- Selector de Tipo de Contrato -->
-            <div class="flex space-x-2 bg-slate-100 p-1 rounded-lg">
-                <button id="btnContinuo" onclick="setTipo('continuo')" class="flex-1 py-2.5 text-sm font-bold rounded-md bg-white shadow text-blue-700 transition-all">Estándar</button>
-                <button id="btnDiscontinuo" onclick="setTipo('discontinuo')" class="flex-1 py-2.5 text-sm font-semibold rounded-md text-slate-500 hover:text-slate-700 transition-all">Viene de Fijo Discontinuo</button>
+            <div class="flex space-x-2 bg-slate-100 dark:bg-slate-900 p-1 rounded-lg transition-colors duration-300">
+                <button id="btnContinuo" onclick="setTipo('continuo')" class="flex-1 py-2.5 text-sm font-bold rounded-md bg-white dark:bg-slate-700 shadow text-blue-700 dark:text-blue-400 transition-all">Estándar</button>
+                <button id="btnDiscontinuo" onclick="setTipo('discontinuo')" class="flex-1 py-2.5 text-sm font-semibold rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-all">Viene de Fijo Discontinuo</button>
             </div>
 
             <!-- Fecha de Inicio -->
             <div>
-                <label id="lblFechaInicio" for="fechaInicio" class="block text-sm font-semibold text-slate-700 mb-1">Fecha de Inicio en la empresa</label>
-                <input type="date" id="fechaInicio" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                <label id="lblFechaInicio" for="fechaInicio" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Fecha de Inicio en la empresa</label>
+                <input type="date" id="fechaInicio" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
             </div>
 
             <!-- Panel Fijo Discontinuo (Oculto por defecto) -->
-            <div id="panelDiscontinuo" class="hidden gap-4 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+            <div id="panelDiscontinuo" class="hidden gap-3 p-4 bg-blue-50 dark:bg-slate-700/50 border border-blue-100 dark:border-slate-600 rounded-lg transition-colors duration-300">
                 <div class="col-span-2">
-                    <p class="text-xs text-blue-800 font-medium mb-1">Introduce el tiempo efectivo reconocido de tus periodos anteriores:</p>
+                    <p class="text-xs text-blue-800 dark:text-blue-300 font-medium mb-1">Introduce el tiempo acumulado de tus contratos anteriores:</p>
                 </div>
                 <div>
-                    <label for="aniosEfectivos" class="block text-sm font-semibold text-slate-700 mb-1">Años acumul.</label>
-                    <input type="number" id="aniosEfectivos" value="0" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label for="aniosEfectivos" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Años</label>
+                    <input type="number" id="aniosEfectivos" value="0" min="0" class="w-full px-2 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none transition-colors">
                 </div>
                 <div>
-                    <label for="mesesEfectivos" class="block text-sm font-semibold text-slate-700 mb-1">Meses acumul.</label>
-                    <input type="number" id="mesesEfectivos" value="0" min="0" max="11" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                    <label for="mesesEfectivos" class="block text-xs font-semibold text-slate-700 dark:text-slate-300 mb-1">Meses</label>
+                    <input type="number" id="mesesEfectivos" value="0" min="0" max="11" class="w-full px-2 py-2 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none transition-colors">
                 </div>
             </div>
 
             <!-- Año a Valorar -->
             <div>
-                <label for="anioValorar" class="block text-sm font-semibold text-slate-700 mb-1">Año a Valorar</label>
-                <input type="number" id="anioValorar" value="2025" oninput="actualizarAyudaAnio()" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
-                <div class="mt-2 flex items-start text-xs text-blue-700 bg-blue-50 p-2.5 rounded-lg border border-blue-100">
+                <label for="anioValorar" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Año a Valorar</label>
+                <input type="number" id="anioValorar" value="2025" oninput="actualizarAyudaAnio()" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
+                <div class="mt-2 flex items-start text-xs text-blue-700 dark:text-blue-300 bg-blue-50 dark:bg-slate-700/50 p-2.5 rounded-lg border border-blue-100 dark:border-slate-600 transition-colors duration-300">
                     <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 shrink-0 mr-1.5 mt-0.5"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" /></svg>
                     <span id="textoAyudaAnio" class="leading-relaxed">Se evalúa el periodo del <strong>01/01/2025 al 31/12/2025</strong> (que se cobra en Abril de 2026).</span>
                 </div>
@@ -78,14 +96,14 @@
             <div class="grid grid-cols-2 gap-4">
                 <!-- Horas Semanales -->
                 <div>
-                    <label for="horasSemanales" class="block text-sm font-semibold text-slate-700 mb-1">Horas Semanales</label>
-                    <input type="number" id="horasSemanales" value="40" min="1" max="40" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                    <label for="horasSemanales" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Horas Semanales</label>
+                    <input type="number" id="horasSemanales" value="40" min="1" max="40" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                 </div>
 
                 <!-- Guarda Legal -->
                 <div>
-                    <label for="guardaLegal" class="block text-sm font-semibold text-slate-700 mb-1">Guarda Legal</label>
-                    <select id="guardaLegal" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition-all">
+                    <label for="guardaLegal" class="block text-sm font-semibold text-slate-700 dark:text-slate-300 mb-1">Guarda Legal</label>
+                    <select id="guardaLegal" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 dark:border-slate-600 bg-white dark:bg-slate-700 text-slate-800 dark:text-slate-100 focus:ring-2 focus:ring-blue-500 outline-none transition-all">
                         <option value="NO">No</option>
                         <option value="SI">Sí</option>
                     </select>
@@ -93,44 +111,77 @@
             </div>
 
             <!-- Botón de Cálculo -->
-            <button onclick="calcularVinculacion()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-95">
+            <button onclick="calcularVinculacion()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 dark:bg-blue-700 dark:hover:bg-blue-600 text-white font-bold py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-95">
                 Mostrar Resultado
             </button>
 
             <!-- Zona de Resultados (Oculta por defecto) -->
-            <div id="resultadoBox" class="hidden mt-6 p-5 bg-slate-50 border border-slate-200 rounded-xl fade-in text-center">
-                <p class="text-sm text-slate-500 mb-1">Antigüedad en <span id="resAnioMostrado" class="font-semibold"></span>: <span id="resAnios" class="font-bold text-slate-700">0</span> años</p>
-                <div class="text-3xl font-black text-blue-600 my-2" id="resImporte">0,00 €</div>
-                <p class="text-xs text-slate-600 font-medium mb-1" id="resDesglose"></p>
-                <p class="text-xs text-slate-400" id="resDetalle">Basado en jornada proporcional</p>
+            <div id="resultadoBox" class="hidden mt-6 p-5 bg-slate-50 dark:bg-slate-700/30 border border-slate-200 dark:border-slate-600 rounded-xl fade-in text-center transition-colors duration-300">
+                <p class="text-sm text-slate-500 dark:text-slate-400 mb-1">Antigüedad en <span id="resAnioMostrado" class="font-semibold text-slate-700 dark:text-slate-300"></span>: <span id="resAnios" class="font-bold text-slate-700 dark:text-slate-200">0</span> años</p>
+                <div class="text-4xl font-black text-blue-600 dark:text-blue-400 my-2" id="resImporte">0,00 €</div>
             </div>
 
         </div>
     </div>
+    
+    <!-- Etiqueta de Versión (V1.0) -->
+    <div class="mt-4 text-sm font-medium text-slate-400 dark:text-slate-500">
+        V1.0
+    </div>
 
-    <!-- Script con la lógica matemática -->
+    <!-- Script con la lógica matemática y de interfaz -->
     <script>
         let tipoContrato = 'continuo';
 
+        // Lógica de Modo Claro/Oscuro
+        function toggleTema() {
+            const htmlElement = document.documentElement;
+            const iconoSolo = document.getElementById('iconoSolo');
+            const iconoLuna = document.getElementById('iconoLuna');
+
+            if (htmlElement.classList.contains('dark')) {
+                htmlElement.classList.remove('dark');
+                iconoSolo.classList.add('hidden');
+                iconoLuna.classList.remove('hidden');
+            } else {
+                htmlElement.classList.add('dark');
+                iconoSolo.classList.remove('hidden');
+                iconoLuna.classList.add('hidden');
+            }
+        }
+
+        // Lógica de Tabs
         function setTipo(tipo) {
             tipoContrato = tipo;
             const btnContinuo = document.getElementById('btnContinuo');
             const btnDiscontinuo = document.getElementById('btnDiscontinuo');
             const panelDiscontinuo = document.getElementById('panelDiscontinuo');
             const lblFechaInicio = document.getElementById('lblFechaInicio');
+            const inputHoras = document.getElementById('horasSemanales');
+
+            const activeClass = "flex-1 py-2.5 text-sm font-bold rounded-md bg-white dark:bg-slate-700 shadow text-blue-700 dark:text-blue-400 transition-all";
+            const inactiveClass = "flex-1 py-2.5 text-sm font-semibold rounded-md text-slate-500 dark:text-slate-400 hover:text-slate-700 dark:hover:text-slate-200 transition-all";
 
             if (tipo === 'continuo') {
-                btnContinuo.className = "flex-1 py-2.5 text-sm font-bold rounded-md bg-white shadow text-blue-700 transition-all";
-                btnDiscontinuo.className = "flex-1 py-2.5 text-sm font-semibold rounded-md text-slate-500 hover:text-slate-700 transition-all";
+                btnContinuo.className = activeClass;
+                btnDiscontinuo.className = inactiveClass;
                 panelDiscontinuo.classList.add('hidden');
                 panelDiscontinuo.classList.remove('grid', 'grid-cols-2');
                 lblFechaInicio.textContent = "Fecha de Inicio en la empresa";
+                
+                // Desbloqueamos horas semanales
+                inputHoras.disabled = false;
+                inputHoras.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'cursor-not-allowed', 'text-slate-500', 'dark:text-slate-500');
             } else {
-                btnDiscontinuo.className = "flex-1 py-2.5 text-sm font-bold rounded-md bg-white shadow text-blue-700 transition-all";
-                btnContinuo.className = "flex-1 py-2.5 text-sm font-semibold rounded-md text-slate-500 hover:text-slate-700 transition-all";
+                btnDiscontinuo.className = activeClass;
+                btnContinuo.className = inactiveClass;
                 panelDiscontinuo.classList.remove('hidden');
                 panelDiscontinuo.classList.add('grid', 'grid-cols-2');
-                lblFechaInicio.textContent = "Fecha de inicio del contrato actual a 40h";
+                lblFechaInicio.innerHTML = "Fecha de inicio del contrato actual";
+                
+                // Desbloqueamos horas semanales para permitir 32h, 40h, etc.
+                inputHoras.disabled = false;
+                inputHoras.classList.remove('bg-slate-100', 'dark:bg-slate-800', 'cursor-not-allowed', 'text-slate-500', 'dark:text-slate-500');
             }
         }
 
@@ -171,96 +222,73 @@
                 return;
             }
 
-            // 2. Calcular la antigüedad y distribución de meses
-            const fechaInicio = new Date(fechaInicioStr);
+            // 2. Preparar fechas (Antigüedad Virtual y Real)
+            const fechaInicioActual = new Date(fechaInicioStr);
+            const fechaInicioVirtual = new Date(fechaInicioStr);
             
-            // Ajuste por Fijo Discontinuo (Antigüedad Virtual)
             if (tipoContrato === 'discontinuo') {
                 const aniosEfectivos = parseInt(document.getElementById('aniosEfectivos').value) || 0;
                 const mesesEfectivos = parseInt(document.getElementById('mesesEfectivos').value) || 0;
                 
-                // Restamos el tiempo efectivo acumulado a la fecha de inicio del contrato actual
-                fechaInicio.setFullYear(fechaInicio.getFullYear() - aniosEfectivos);
-                fechaInicio.setMonth(fechaInicio.getMonth() - mesesEfectivos);
+                // Restamos el tiempo efectivo acumulado a la fecha actual para hallar la antigüedad real
+                fechaInicioVirtual.setFullYear(fechaInicioVirtual.getFullYear() - aniosEfectivos);
+                fechaInicioVirtual.setMonth(fechaInicioVirtual.getMonth() - mesesEfectivos);
             }
 
-            const anioInicio = fechaInicio.getFullYear();
-            const mesInicio = fechaInicio.getMonth() + 1; // Mes 1 a 12
+            const anioInicioVirtual = fechaInicioVirtual.getFullYear();
+            const mesInicioVirtual = fechaInicioVirtual.getMonth() + 1; // 1 a 12
 
-            let anioCumple = anioValorar - anioInicio;
-            if (anioCumple < 0) anioCumple = 0;
-
-            // Calculamos meses antes del mes de aniversario y meses desde el aniversario (incluido)
-            let mesesAntesCumple = mesInicio - 1;
-            let mesesDespuesCumple = 12 - mesesAntesCumple;
-
-            let aniosAntesCumple = Math.max(0, anioCumple - 1);
-            let aniosDespuesCumple = anioCumple;
-
-            // 3. Determinar el importe base mensual según el tramo de años
-            let tarifaAntes = getTarifaAnual(aniosAntesCumple);
-            let tarifaDespues = getTarifaAnual(aniosDespuesCumple);
-
-            let importeBaseAntes = (tarifaAntes / 12) * mesesAntesCumple;
-            let importeBaseDespues = (tarifaDespues / 12) * mesesDespuesCumple;
-            let importeBaseTotal = importeBaseAntes + importeBaseDespues;
-
-            // 4. Calcular la proporcionalidad (Horas o Guarda Legal)
-            let importeFinalAntes = 0;
-            let importeFinalDespues = 0;
             let importeFinalTotal = 0;
-            let detalleTexto = "";
+            let anioMaximo = 0;
 
-            if (guardaLegal === "SI") {
-                // Con guarda legal, cobra el 100% independientemente de las horas
-                importeFinalAntes = importeBaseAntes;
-                importeFinalDespues = importeBaseDespues;
-                importeFinalTotal = importeBaseTotal;
-                detalleTexto = "Importe al 100% por Reducción de Guarda Legal";
-            } else {
-                // Sin guarda legal, cobra la parte proporcional a 40h
-                const proporcion = horasSemanales / 40;
-                importeFinalAntes = importeBaseAntes * proporcion;
-                importeFinalDespues = importeBaseDespues * proporcion;
-                importeFinalTotal = importeBaseTotal * proporcion;
-
-                if (horasSemanales === 40) {
-                    detalleTexto = "Importe al 100% (Jornada completa)";
-                } else {
-                    detalleTexto = `Importe proporcional (${horasSemanales}h de 40h)`;
+            // 3. Evaluar el año mes a mes para una precisión total
+            for (let mes = 1; mes <= 12; mes++) {
+                
+                // A) Calcular antigüedad en este mes específico
+                let antiguedad = anioValorar - anioInicioVirtual;
+                if (mes < mesInicioVirtual) {
+                    antiguedad -= 1; 
                 }
+                if (antiguedad < 0) antiguedad = 0;
+                if (antiguedad > anioMaximo) anioMaximo = antiguedad;
+
+                // B) Obtener tarifa de ese tramo
+                let tarifaAnual = getTarifaAnual(antiguedad);
+                let importeBaseMes = tarifaAnual / 12;
+
+                // C) Determinar horas aplicables para este mes (Cálculo histórico ponderado)
+                let horasAplicables = horasSemanales; // Las actuales por defecto
+                
+                if (tipoContrato === 'discontinuo' && antiguedad > 0) {
+                    const aniosEfectivos = parseInt(document.getElementById('aniosEfectivos').value) || 0;
+                    const mesesEfectivos = parseInt(document.getElementById('mesesEfectivos').value) || 0;
+                    
+                    let aniosDiscontinuosTotales = aniosEfectivos + (mesesEfectivos / 12);
+                    let aniosDiscAplicables = Math.min(aniosDiscontinuosTotales, antiguedad);
+                    let aniosContAplicables = antiguedad - aniosDiscAplicables;
+                    
+                    horasAplicables = ((aniosDiscAplicables * 32) + (aniosContAplicables * horasSemanales)) / antiguedad;
+                }
+
+                if (guardaLegal === "SI") {
+                    horasAplicables = 40; // Cobra al 100% de la base
+                }
+
+                // D) Cálculo proporcional de este mes
+                let importeMesFinal = importeBaseMes * (horasAplicables / 40);
+                importeFinalTotal += importeMesFinal;
             }
 
-            // 5. Mostrar los resultados en la interfaz
+            // 4. Mostrar los resultados en la interfaz
             document.getElementById('resAnioMostrado').textContent = anioValorar;
-            document.getElementById('resAnios').textContent = anioCumple;
+            document.getElementById('resAnios').textContent = anioMaximo;
             
-            // Formatear moneda a estilo europeo
+            // Formatear moneda
             const formatoMoneda = new Intl.NumberFormat('es-ES', { 
                 style: 'currency', 
                 currency: 'EUR' 
             });
-            
             document.getElementById('resImporte').textContent = formatoMoneda.format(importeFinalTotal);
-
-            // Desglose visual para que el usuario entienda el prorrateo de meses
-            let desgloseTexto = "";
-            if (mesesAntesCumple > 0 && anioCumple > 0 && aniosAntesCumple !== aniosDespuesCumple) {
-                desgloseTexto = `Desglose: ${mesesAntesCumple} meses de ${aniosAntesCumple} años (${formatoMoneda.format(importeFinalAntes)}) + ${mesesDespuesCumple} meses de ${aniosDespuesCumple} años (${formatoMoneda.format(importeFinalDespues)})`;
-            } else {
-                desgloseTexto = `Cálculo de 12 meses completos con antigüedad de ${aniosDespuesCumple} años`;
-            }
-
-            // Añadir nota de antigüedad reconocida si es fijo discontinuo
-            if (tipoContrato === 'discontinuo') {
-                const diaReconocido = fechaInicio.getDate().toString().padStart(2, '0');
-                const mesReconocido = (fechaInicio.getMonth() + 1).toString().padStart(2, '0');
-                const anioReconocido = fechaInicio.getFullYear();
-                desgloseTexto += ` | (Antigüedad virtual calculada desde: ${diaReconocido}/${mesReconocido}/${anioReconocido})`;
-            }
-
-            document.getElementById('resDesglose').textContent = desgloseTexto;
-            document.getElementById('resDetalle').textContent = detalleTexto;
 
             // Hacer visible la caja de resultados
             const resultBox = document.getElementById('resultadoBox');
@@ -279,11 +307,9 @@
         function mostrarNotificacion() {
             const toast = document.getElementById('toastNotificacion');
             
-            // Animación de entrada
             toast.classList.remove('opacity-0', '-translate-y-10');
             toast.classList.add('opacity-100', 'translate-y-0');
             
-            // Ocultar automáticamente después de 5 segundos
             setTimeout(() => {
                 toast.classList.remove('opacity-100', 'translate-y-0');
                 toast.classList.add('opacity-0', '-translate-y-10');
