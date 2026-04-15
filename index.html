@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Calculadora de Vinculación</title>
+    <!-- Cargamos Tailwind CSS para el diseño rápido y moderno -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        /* Pequeña animación para la aparición del resultado */
+        .fade-in {
+            animation: fadeIn 0.4s ease-in-out;
+        }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(-10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-slate-50 min-h-screen flex items-center justify-center p-4 font-sans text-slate-800">
+
+    <!-- Notificación tipo Toast (Oculta por defecto) -->
+    <div id="toastNotificacion" class="fixed top-5 left-1/2 transform -translate-x-1/2 z-50 flex items-center w-full max-w-sm p-4 space-x-3 text-amber-800 bg-amber-100 border border-amber-300 rounded-lg shadow-lg transition-all duration-500 opacity-0 -translate-y-10 pointer-events-none">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" class="w-6 h-6 shrink-0 text-amber-600">
+            <path fill-rule="evenodd" d="M9.401 3.003c1.155-2 4.043-2 5.197 0l7.355 12.748c1.154 2-.29 4.5-2.599 4.5H4.645c-2.309 0-3.752-2.5-2.598-4.5L9.4 3.003zM12 8.25a.75.75 0 01.75.75v3.75a.75.75 0 01-1.5 0V9a.75.75 0 01.75-.75zm0 8.25a1 1 0 100-2 1 1 0 000 2z" clip-rule="evenodd" />
+        </svg>
+        <div class="font-medium text-sm">Nota: Este cálculo es un resultado puramente teórico y orientativo.</div>
+    </div>
+
+    <div class="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden border border-slate-100">
+        
+        <!-- Cabecera -->
+        <div class="bg-blue-600 p-6 text-center">
+            <h1 class="text-2xl font-bold text-white">Calculadora de Vinculación</h1>
+            <p class="text-blue-100 text-sm mt-1">Calcula tu importe a percibir</p>
+        </div>
+
+        <!-- Formulario -->
+        <div class="p-6 space-y-5">
+            
+            <!-- Selector de Tipo de Contrato -->
+            <div class="flex space-x-2 bg-slate-100 p-1 rounded-lg">
+                <button id="btnContinuo" onclick="setTipo('continuo')" class="flex-1 py-2.5 text-sm font-bold rounded-md bg-white shadow text-blue-700 transition-all">Estándar</button>
+                <button id="btnDiscontinuo" onclick="setTipo('discontinuo')" class="flex-1 py-2.5 text-sm font-semibold rounded-md text-slate-500 hover:text-slate-700 transition-all">Viene de Fijo Discontinuo</button>
+            </div>
+
+            <!-- Fecha de Inicio -->
+            <div>
+                <label id="lblFechaInicio" for="fechaInicio" class="block text-sm font-semibold text-slate-700 mb-1">Fecha de Inicio en la empresa</label>
+                <input type="date" id="fechaInicio" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+            </div>
+
+            <!-- Panel Fijo Discontinuo (Oculto por defecto) -->
+            <div id="panelDiscontinuo" class="hidden gap-4 p-4 bg-blue-50 border border-blue-100 rounded-lg">
+                <div class="col-span-2">
+                    <p class="text-xs text-blue-800 font-medium mb-1">Introduce el tiempo efectivo reconocido de tus periodos anteriores:</p>
+                </div>
+                <div>
+                    <label for="aniosEfectivos" class="block text-sm font-semibold text-slate-700 mb-1">Años acumul.</label>
+                    <input type="number" id="aniosEfectivos" value="0" min="0" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+                <div>
+                    <label for="mesesEfectivos" class="block text-sm font-semibold text-slate-700 mb-1">Meses acumul.</label>
+                    <input type="number" id="mesesEfectivos" value="0" min="0" max="11" class="w-full px-3 py-2 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 outline-none">
+                </div>
+            </div>
+
+            <!-- Año a Valorar -->
+            <div>
+                <label for="anioValorar" class="block text-sm font-semibold text-slate-700 mb-1">Año a Valorar</label>
+                <input type="number" id="anioValorar" value="2025" oninput="actualizarAyudaAnio()" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                <div class="mt-2 flex items-start text-xs text-blue-700 bg-blue-50 p-2.5 rounded-lg border border-blue-100">
+                    <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20" fill="currentColor" class="w-4 h-4 shrink-0 mr-1.5 mt-0.5"><path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a.75.75 0 000 1.5h.253a.25.25 0 01.244.304l-.459 2.066A1.75 1.75 0 0010.747 15H11a.75.75 0 000-1.5h-.253a.25.25 0 01-.244-.304l.459-2.066A1.75 1.75 0 009.253 9H9z" clip-rule="evenodd" /></svg>
+                    <span id="textoAyudaAnio" class="leading-relaxed">Se evalúa el periodo del <strong>01/01/2025 al 31/12/2025</strong> (que se cobra en Abril de 2026).</span>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-4">
+                <!-- Horas Semanales -->
+                <div>
+                    <label for="horasSemanales" class="block text-sm font-semibold text-slate-700 mb-1">Horas Semanales</label>
+                    <input type="number" id="horasSemanales" value="40" min="1" max="40" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none transition-all">
+                </div>
+
+                <!-- Guarda Legal -->
+                <div>
+                    <label for="guardaLegal" class="block text-sm font-semibold text-slate-700 mb-1">Guarda Legal</label>
+                    <select id="guardaLegal" class="w-full px-4 py-2.5 rounded-lg border border-slate-300 focus:ring-2 focus:ring-blue-500 focus:border-blue-500 outline-none bg-white transition-all">
+                        <option value="NO">No</option>
+                        <option value="SI">Sí</option>
+                    </select>
+                </div>
+            </div>
+
+            <!-- Botón de Cálculo -->
+            <button onclick="calcularVinculacion()" class="w-full mt-4 bg-blue-600 hover:bg-blue-700 text-white font-bold py-3 rounded-lg shadow-md hover:shadow-lg transition-all duration-200 active:scale-95">
+                Mostrar Resultado
+            </button>
+
+            <!-- Zona de Resultados (Oculta por defecto) -->
+            <div id="resultadoBox" class="hidden mt-6 p-5 bg-slate-50 border border-slate-200 rounded-xl fade-in text-center">
+                <p class="text-sm text-slate-500 mb-1">Antigüedad en <span id="resAnioMostrado" class="font-semibold"></span>: <span id="resAnios" class="font-bold text-slate-700">0</span> años</p>
+                <div class="text-3xl font-black text-blue-600 my-2" id="resImporte">0,00 €</div>
+                <p class="text-xs text-slate-600 font-medium mb-1" id="resDesglose"></p>
+                <p class="text-xs text-slate-400" id="resDetalle">Basado en jornada proporcional</p>
+            </div>
+
+        </div>
+    </div>
+
+    <!-- Script con la lógica matemática -->
+    <script>
+        let tipoContrato = 'continuo';
+
+        function setTipo(tipo) {
+            tipoContrato = tipo;
+            const btnContinuo = document.getElementById('btnContinuo');
+            const btnDiscontinuo = document.getElementById('btnDiscontinuo');
+            const panelDiscontinuo = document.getElementById('panelDiscontinuo');
+            const lblFechaInicio = document.getElementById('lblFechaInicio');
+
+            if (tipo === 'continuo') {
+                btnContinuo.className = "flex-1 py-2.5 text-sm font-bold rounded-md bg-white shadow text-blue-700 transition-all";
+                btnDiscontinuo.className = "flex-1 py-2.5 text-sm font-semibold rounded-md text-slate-500 hover:text-slate-700 transition-all";
+                panelDiscontinuo.classList.add('hidden');
+                panelDiscontinuo.classList.remove('grid', 'grid-cols-2');
+                lblFechaInicio.textContent = "Fecha de Inicio en la empresa";
+            } else {
+                btnDiscontinuo.className = "flex-1 py-2.5 text-sm font-bold rounded-md bg-white shadow text-blue-700 transition-all";
+                btnContinuo.className = "flex-1 py-2.5 text-sm font-semibold rounded-md text-slate-500 hover:text-slate-700 transition-all";
+                panelDiscontinuo.classList.remove('hidden');
+                panelDiscontinuo.classList.add('grid', 'grid-cols-2');
+                lblFechaInicio.textContent = "Fecha de inicio del contrato actual a 40h";
+            }
+        }
+
+        function actualizarAyudaAnio() {
+            const anio = parseInt(document.getElementById('anioValorar').value);
+            if (anio) {
+                const anioCobro = anio + 1;
+                document.getElementById('textoAyudaAnio').innerHTML = `Se evalúa el periodo del <strong>01/01/${anio} al 31/12/${anio}</strong> (que se cobra en Abril de ${anioCobro}).`;
+            }
+        }
+
+        function getTarifaAnual(anios) {
+            if (anios < 3) return 0;
+            if (anios <= 5) return 200;
+            if (anios <= 8) return 260;
+            if (anios <= 11) return 400;
+            if (anios <= 14) return 450;
+            if (anios <= 17) return 570;
+            if (anios <= 20) return 700;
+            if (anios <= 23) return 900;
+            return 1200;
+        }
+
+        function calcularVinculacion() {
+            // 1. Obtener los valores de los inputs
+            const fechaInicioStr = document.getElementById('fechaInicio').value;
+            const anioValorar = parseInt(document.getElementById('anioValorar').value);
+            const horasSemanales = parseFloat(document.getElementById('horasSemanales').value);
+            const guardaLegal = document.getElementById('guardaLegal').value;
+
+            // Validaciones básicas
+            if (!fechaInicioStr) {
+                alert("Por favor, introduce la fecha de inicio.");
+                return;
+            }
+            if (!anioValorar || !horasSemanales) {
+                alert("Por favor, rellena todos los campos numéricos.");
+                return;
+            }
+
+            // 2. Calcular la antigüedad y distribución de meses
+            const fechaInicio = new Date(fechaInicioStr);
+            
+            // Ajuste por Fijo Discontinuo (Antigüedad Virtual)
+            if (tipoContrato === 'discontinuo') {
+                const aniosEfectivos = parseInt(document.getElementById('aniosEfectivos').value) || 0;
+                const mesesEfectivos = parseInt(document.getElementById('mesesEfectivos').value) || 0;
+                
+                // Restamos el tiempo efectivo acumulado a la fecha de inicio del contrato actual
+                fechaInicio.setFullYear(fechaInicio.getFullYear() - aniosEfectivos);
+                fechaInicio.setMonth(fechaInicio.getMonth() - mesesEfectivos);
+            }
+
+            const anioInicio = fechaInicio.getFullYear();
+            const mesInicio = fechaInicio.getMonth() + 1; // Mes 1 a 12
+
+            let anioCumple = anioValorar - anioInicio;
+            if (anioCumple < 0) anioCumple = 0;
+
+            // Calculamos meses antes del mes de aniversario y meses desde el aniversario (incluido)
+            let mesesAntesCumple = mesInicio - 1;
+            let mesesDespuesCumple = 12 - mesesAntesCumple;
+
+            let aniosAntesCumple = Math.max(0, anioCumple - 1);
+            let aniosDespuesCumple = anioCumple;
+
+            // 3. Determinar el importe base mensual según el tramo de años
+            let tarifaAntes = getTarifaAnual(aniosAntesCumple);
+            let tarifaDespues = getTarifaAnual(aniosDespuesCumple);
+
+            let importeBaseAntes = (tarifaAntes / 12) * mesesAntesCumple;
+            let importeBaseDespues = (tarifaDespues / 12) * mesesDespuesCumple;
+            let importeBaseTotal = importeBaseAntes + importeBaseDespues;
+
+            // 4. Calcular la proporcionalidad (Horas o Guarda Legal)
+            let importeFinalAntes = 0;
+            let importeFinalDespues = 0;
+            let importeFinalTotal = 0;
+            let detalleTexto = "";
+
+            if (guardaLegal === "SI") {
+                // Con guarda legal, cobra el 100% independientemente de las horas
+                importeFinalAntes = importeBaseAntes;
+                importeFinalDespues = importeBaseDespues;
+                importeFinalTotal = importeBaseTotal;
+                detalleTexto = "Importe al 100% por Reducción de Guarda Legal";
+            } else {
+                // Sin guarda legal, cobra la parte proporcional a 40h
+                const proporcion = horasSemanales / 40;
+                importeFinalAntes = importeBaseAntes * proporcion;
+                importeFinalDespues = importeBaseDespues * proporcion;
+                importeFinalTotal = importeBaseTotal * proporcion;
+
+                if (horasSemanales === 40) {
+                    detalleTexto = "Importe al 100% (Jornada completa)";
+                } else {
+                    detalleTexto = `Importe proporcional (${horasSemanales}h de 40h)`;
+                }
+            }
+
+            // 5. Mostrar los resultados en la interfaz
+            document.getElementById('resAnioMostrado').textContent = anioValorar;
+            document.getElementById('resAnios').textContent = anioCumple;
+            
+            // Formatear moneda a estilo europeo
+            const formatoMoneda = new Intl.NumberFormat('es-ES', { 
+                style: 'currency', 
+                currency: 'EUR' 
+            });
+            
+            document.getElementById('resImporte').textContent = formatoMoneda.format(importeFinalTotal);
+
+            // Desglose visual para que el usuario entienda el prorrateo de meses
+            let desgloseTexto = "";
+            if (mesesAntesCumple > 0 && anioCumple > 0 && aniosAntesCumple !== aniosDespuesCumple) {
+                desgloseTexto = `Desglose: ${mesesAntesCumple} meses de ${aniosAntesCumple} años (${formatoMoneda.format(importeFinalAntes)}) + ${mesesDespuesCumple} meses de ${aniosDespuesCumple} años (${formatoMoneda.format(importeFinalDespues)})`;
+            } else {
+                desgloseTexto = `Cálculo de 12 meses completos con antigüedad de ${aniosDespuesCumple} años`;
+            }
+
+            // Añadir nota de antigüedad reconocida si es fijo discontinuo
+            if (tipoContrato === 'discontinuo') {
+                const diaReconocido = fechaInicio.getDate().toString().padStart(2, '0');
+                const mesReconocido = (fechaInicio.getMonth() + 1).toString().padStart(2, '0');
+                const anioReconocido = fechaInicio.getFullYear();
+                desgloseTexto += ` | (Antigüedad virtual calculada desde: ${diaReconocido}/${mesReconocido}/${anioReconocido})`;
+            }
+
+            document.getElementById('resDesglose').textContent = desgloseTexto;
+            document.getElementById('resDetalle').textContent = detalleTexto;
+
+            // Hacer visible la caja de resultados
+            const resultBox = document.getElementById('resultadoBox');
+            resultBox.classList.remove('hidden');
+            
+            // Reiniciar animación si se calcula varias veces
+            resultBox.classList.remove('fade-in');
+            void resultBox.offsetWidth; // Trigger reflow
+            resultBox.classList.add('fade-in');
+
+            // Mostrar notificación de aviso teórico
+            mostrarNotificacion();
+        }
+
+        // Función para manejar la notificación flotante
+        function mostrarNotificacion() {
+            const toast = document.getElementById('toastNotificacion');
+            
+            // Animación de entrada
+            toast.classList.remove('opacity-0', '-translate-y-10');
+            toast.classList.add('opacity-100', 'translate-y-0');
+            
+            // Ocultar automáticamente después de 5 segundos
+            setTimeout(() => {
+                toast.classList.remove('opacity-100', 'translate-y-0');
+                toast.classList.add('opacity-0', '-translate-y-10');
+            }, 5000);
+        }
+    </script>
+</body>
+</html>
